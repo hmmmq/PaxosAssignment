@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="testlib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/target/testlib/mockito-core-3.5.13.jar!/" />
+      <root url="jar://$PROJECT_DIR$/target/testlib/byte-buddy-agent-1.10.15.jar!/" />
+      <root url="jar://$PROJECT_DIR$/target/testlib/objenesis-3.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/target/testlib/hamcrest-core-1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/target/testlib/mockito-all-1.10.19.jar!/" />
+      <root url="jar://$PROJECT_DIR$/target/testlib/byte-buddy-1.10.15.jar!/" />
+      <root url="jar://$PROJECT_DIR$/target/testlib/junit-4.13.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

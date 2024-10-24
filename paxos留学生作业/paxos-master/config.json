@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Assignment Scenario",
+    "description": "Two councillors send voting proposals for themselves at the same time. M1, M2, M3 send voting proposals for themselves. M1 is never unavailable and response immediately. M2 is available for short-burts of time and has LATE replies. M3 becomes unavailable indefinitely but while he is available has MEDIUM replies. All other councillors have varied responses but will not propose any value. These members never become unavailable.",
+
+    "members": [
+      {
+        "timeToPropose": 0,
+        "ambition": true,
+        "responseTime": "IMMEDIATE"
+      },
+      {
+        "timeToPropose": 0,
+        "ambition": true,
+        "timeToFail": 2000,
+        "timeToRestart": 4000,
+        "responseTime": "LATE"
+      },
+      {
+        "timeToPropose": 250,
+        "ambition": true,
+        "timeToFail": 4000,
+        "timeToRestart": -1,
+        "responseTime": "MEDIUM"
+      },
+      {
+        "timeToPropose": -1,
+        "responseTime": "NEVER"
+      },
+      {
+        "timeToPropose": -1,
+        "responseTime": "LATE"
+      },
+      {
+        "timeToPropose": -1,
+        "responseTime": "MEDIUM"
+      },
+      {
+        "timeToPropose": -1,
+        "responseTime": "IMMEDIATE"
+      },
+      {
+        "timeToPropose": -1,
+        "responseTime": "LATE"
+      },
+      {
+        "timeToPropose": -1,
+        "responseTime": "MEDIUM"
+      }
+    ]
+  }
+]
