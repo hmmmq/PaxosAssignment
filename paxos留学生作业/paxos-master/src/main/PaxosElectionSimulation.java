@@ -101,14 +101,14 @@ public class PaxosElectionSimulation {
     public static void main(String[] args) {
         // Members M1 - M9
         List<Member> members = Arrays.asList(
-                new Member("M1", 100, true),
-                new Member("M2", 200, true),   // Slightly delayed response
-                new Member("M3", 300, true),   // More delayed response
+                new Member("M1", 100, true),   // Fastest response
+                new Member("M2", 300, true),   // More delayed response
+                new Member("M3", 200, true),   // Slightly delayed response
                 new Member("M4", 300, true),
-                new Member("M5", 400, true),
+                new Member("M5", 100, true),
                 new Member("M6", 500, true),
-                new Member("M7", 600, true),
-                new Member("M8", 700, true),
+                new Member("M7", 400, true),
+                new Member("M8", 250, true),
                 new Member("M9", 800, true)
         );
 
