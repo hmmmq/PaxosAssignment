@@ -53,19 +53,17 @@ Your assignment will be marked out of 100 points, as following:
 ## 配置文件config.json
 `config.json` 文件包含了两个不同的场景配置，每个场景描述了多个成员的行为和响应时间。以下是对每个场景的详细解释：
 
-1. **Two Proposers**：
-    - **描述**：两个议员同时为自己发送投票提案。所有议员都有立即响应。
+1. **All Proposers**：
+    - **描述**：两个议员同时为自己发送投票提案。M0, M1, M3 为自己发送投票提案。M0 永远可用并立即响应。M1 短时间内可用并有延迟回复。M2 无限期不可用，但在可用时有中等回复。其他议员有不同的响应时间，但不会提出任何值。这些成员永远不会变得不可用。
     - **成员**：
-        - 前两个成员 (`timeToPropose` 为 0) 会立即提出提案，并且 `ambition` 属性为 `true`，表示他们有提案的意图。
-        - 其余成员 (`timeToPropose` 为 -1) 不会提出提案。
-
-2. **All Proposers**：
-    - **描述**：M0, M1, M3 为自己发送投票提案。M0 永远可用并立即响应。M1 短时间内可用并有延迟回复。M2 无限期不可用，但在可用时有中等回复。其他议员有不同的响应时间，但不会提出任何值。这些成员永远不会变得不可用。
-    - **成员**：
-        - M0 (`timeToPropose` 为 250, `ambition` 为 `true`, `responseTime` 为 `IMMEDIATE`) 会立即提出提案。
-        - M1 (`timeToPropose` 为 1900, `ambition` 为 `true`, `timeToFail` 为 2000, `timeToRestart` 为 4000, `responseTime` 为 `LATE`) 会在短时间内提出提案，并有延迟回复。
-        - M2 (`timeToPropose` 为 250, `ambition` 为 `true`, `timeToFail` 为 4000, `timeToRestart` 为 -1, `responseTime` 为 `MEDIUM`) 会在可用时提出提案，并有中等回复。
+        - 前两个成员M1,M2 (`timeToPropose` 为 0) 会同时提出提案，并且 `ambition` 属性为 `true`，表示他们有提案的意图。
+        - M1 (`timeToPropose` 为 250, `ambition` 为 `true`, `responseTime` 为 `IMMEDIATE`) 会立即提出提案。
+      、- M2 (`timeToPropose` 为 1900, `ambition` 为 `true`, `timeToFail` 为 2000, `timeToRestart` 为 4000, `responseTime` 为 `LATE`) 会在短时间内提出提案，并有延迟回复。
+        - M3 (`timeToPropose` 为 250, `ambition` 为 `true`, `timeToFail` 为 4000, `timeToRestart` 为 -1, `responseTime` 为 `MEDIUM`) 会在可用时提出提案，并有中等回复。
+        - 其余成员 (`timeToPropose` 为 -1) 不会提出提案,并且`ambition` 属性为 `false`，表示他们没有提案的意图。
         - 其余成员有不同的响应时间 (`responseTime` 为 `NEVER`, `LATE`, `MEDIUM`, `LATE`, `IMMEDIATE`, `MEDIUM`)，但不会提出任何值。
+
+
 # eclient包
 这个文件包含两个类，分别是 `EmailClient` 和 `SocketConnecter`。以下是它们的功能：
 
