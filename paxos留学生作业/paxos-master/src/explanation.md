@@ -38,142 +38,37 @@ Your assignment will be marked out of 100 points, as following:
 - **30 分**：Paxos 实现能够在所有 M1-M9 对投票查询有即时响应的情况下工作。
 - **30 分**：Paxos 实现能够在 M1-M9 对投票查询有不同响应时间（即时响应、小延迟、大延迟和无响应）的情况下工作，包括 M2 或 M3 提出提案后离线的情况。
 - **20 分**：测试工具能够验证上述场景，并提供工作证据（如打印输出）。
-# driver包
-[PaxosDriver.java](main%2Fdriver%2FPaxosDriver.java)
-`PaxosDriver` 类用于模拟投票场景。它从一个配置文件（`config.json`）中读取场景配置，并根据这些配置运行投票模拟。具体功能包括：
-1. **读取配置文件**：从命令行参数中获取配置文件路径，并读取其中的 JSON 数据。
-2. **运行场景**：遍历 JSON 数据中的每个场景，调用 `runScenario` 方法运行每个场景。
-3. **模拟投票**：在 `runScenario` 方法中，调用 `simulateVoting` 方法模拟投票过程。
-4. **启动邮件服务器**：在 `simulateVoting` 方法中，启动一个邮件服务器。
-5. **创建成员线程**：根据配置文件中的成员信息，创建并启动多个成员线程。
-6. **等待投票结束**：等待所有成员线程完成投票过程。
-7. **处理线程终止**：在投票结束后，终止所有成员线程。
-
-该类主要用于测试和模拟分布式系统中的投票协议（如 Paxos 协议）。
-## 配置文件config.json
-`config.json` 文件包含了两个不同的场景配置，每个场景描述了多个成员的行为和响应时间。以下是对每个场景的详细解释：
-
-1. **All Proposers**：
-    - **描述**：两个议员同时为自己发送投票提案。M0, M1, M3 为自己发送投票提案。M0 永远可用并立即响应。M1 短时间内可用并有延迟回复。M2 无限期不可用，但在可用时有中等回复。其他议员有不同的响应时间，但不会提出任何值。这些成员永远不会变得不可用。
-    - **成员**：
-        - 前两个成员M1,M2 (`timeToPropose` 为 0) 会同时提出提案，并且 `ambition` 属性为 `true`，表示他们有提案的意图。
-        - M1 (`timeToPropose` 为 250, `ambition` 为 `true`, `responseTime` 为 `IMMEDIATE`) 会立即提出提案。
-      、- M2 (`timeToPropose` 为 1900, `ambition` 为 `true`, `timeToFail` 为 2000, `timeToRestart` 为 4000, `responseTime` 为 `LATE`) 会在短时间内提出提案，并有延迟回复。
-        - M3 (`timeToPropose` 为 250, `ambition` 为 `true`, `timeToFail` 为 4000, `timeToRestart` 为 -1, `responseTime` 为 `MEDIUM`) 会在可用时提出提案，并有中等回复。
-        - 其余成员 (`timeToPropose` 为 -1) 不会提出提案,并且`ambition` 属性为 `false`，表示他们没有提案的意图。
-        - 其余成员有不同的响应时间 (`responseTime` 为 `NEVER`, `LATE`, `MEDIUM`, `LATE`, `IMMEDIATE`, `MEDIUM`)，但不会提出任何值。
 
 
-# eclient包
-这个文件包含两个类，分别是 `EmailClient` 和 `SocketConnecter`。以下是它们的功能：
+这个代码实现了一个模拟的Paxos选举协议。以下是对代码的详细解释：
 
-1. **`EmailClient` 类**：
-    - **功能**：维护与服务器的一对一连接，提供发送和接收消息的服务。
-    - **主要方法**：
-        - `send(String message, int recipient)`：向服务器发送消息。
-        - `receive()`：接收一条消息。
-        - `stripMessage(String message)`：去除消息中的收件人 ID，并检查收件人是否正确。
-        - `ensureConnection()`：确保与服务器的连接已建立。
-        - `initializeInbox()`：初始化一个线程，将接收到的消息缓冲到收件箱中。
+1. **`Member` 类**：
+   - **功能**：表示一个成员，包含成员的ID、响应时间和可用性。
+   - **主要方法**：
+      - `vote(String candidate)`：模拟成员投票给候选人，如果成员不可用则返回`false`，否则模拟响应延迟后返回`true`。
 
-2. **`SocketConnecter` 类**：
-    - **功能**：用于异步连接服务器，允许用户在主线程中继续操作。
-    - **主要方法**：
-        - `getConnection()`：返回一个 `Future<Socket>`，用于获取服务器连接。
-        - `SocketConnecterCallable` 内部类：实现 `Callable<Socket>` 接口，轮询服务器连接并返回一个 `Socket` 对象。
-# eserver包
-`src/main/eserver/EmailConnection.java` 文件包含两个类，分别是 `EmailConnection` 和 `ResponderRunnable`。以下是它们的功能：
+2. **`PaxosServer` 类**：
+   - **功能**：管理投票和选举结果。
+   - **主要方法**：
+      - `receiveVote(String memberId, String candidate)`：接收成员的投票，如果成员已经投票则返回`false`，否则记录投票并返回`true`。
+      - `checkMajority(String candidate)`：检查某个候选人是否获得了多数票。
+      - `announceResult()`：宣布选举结果，统计每个候选人的票数。
 
-1. **`EmailConnection` 类**：
-    - **功能**：监听单个电子邮件连接，接收并根据 ID 将电子邮件发送给收件人。
-    - **主要方法**：
-        - `send(String message)`：向客户端发送消息。
-        - `join()`：优雅地停止响应线程。
-        - `respond(ConcurrentMap<Integer, EmailConnection> emailRegistry)`：初始化响应线程。
+3. **`PaxosProtocol` 类**：
+   - **功能**：实现Paxos选举协议，管理选举过程。
+   - **主要方法**：
+      - `startElection(String candidate)`：启动选举，所有成员并发投票，等待所有投票完成后检查候选人是否获得多数票。
 
-2. **`ResponderRunnable` 类**：
-    - **功能**：监听与电子邮件客户端的单个连接，并使用 `emailRegistry` 将消息发送给不同的收件人。
-    - **主要方法**：
-        - `run()`：读取客户端 ID 并将其注册到 `emailRegistry`，然后监听电子邮件客户端并将消息重定向给收件人。
-        - `respond(BufferedReader reader)`：监听电子邮件客户端并将邮件重定向给收件人。
+4. **`PaxosElectionSimulation` 类**：
+   - **功能**：主类，模拟Paxos选举过程。
+   - **主要方法**：
+      - `main(String[] args)`：创建成员和服务器，启动多个选举线程，模拟并发选举过程，最后宣布选举结果。
 
-`src/main/eserver/EmailServer.java` 文件包含一个类：
-
-3. **`EmailServer` 类**：
-    - **功能**：监听并接受电子邮件连接。
-    - **主要方法**：
-        - `run()`：启动服务器套接字，监听指定端口，并为每个连接创建一个新的 `EmailConnection` 实例。
-
-# paxos包
-`src/main/paxos/AcceptorRunnable.java` 文件包含一个类：
-
-1. **`AcceptorRunnable` 类**：
-    - **功能**：响应来自生产者/消费者队列的准备和提案消息。
-    - **主要方法**：
-        - `run()`：启动线程，接收消息并处理准备和提案请求。
-        - `receiveMessages()`：接收并处理消息，根据消息类型调用相应的处理方法。
-        - `handlePrepare(String message)`：处理准备请求，发送承诺或拒绝消息。
-        - `handleProposal(String message)`：处理提案请求，发送接受或拒绝消息。
-
-`src/main/paxos/DelayedMessageExecutor.java` 文件包含一个类：
-2. **`DelayedMessageExecutor` 类**：
-    - **功能**：在预定义的延迟后异步发送消息，使用固定线程池。
-    - **主要方法**：
-        - `send(String message, int recipient)`：提交任务到线程池，并在某些延迟后发送消息。
-
-`src/main/paxos/MemberRunnable.java` 文件包含一个类：
-
-3. **`MemberRunnable` 类**：
-    - **功能**：实现 Paxos 协议，管理提议者和接受者线程，并处理模拟故障。
-    - **主要方法**：
-        - `run()`：启动提议者和接受者线程，并处理故障模拟。
-        - `handleFailure(Timer timer)`：计算当前是否处于故障状态，并设置定时器。
-        - `multiplexMessages()`：接收消息并将其分发到相应的队列。
-        - `gracefulShutdown()`：优雅地关闭提议者和接受者线程。
-
-`src/main/paxos/MessageCodes.java` 文件包含一个类：
-
-4. **`MessageCodes` 类**：
-    - **功能**：定义用于标识五种消息类型的字符常量。
-    - **主要常量**：
-        - `PREPARE`：表示准备消息的字符常量。
-        - `PROMISE`：表示承诺消息的字符常量。
-        - `PROPOSAL`：表示提案消息的字符常量。
-        - `ACCEPT`：表示接受消息的字符常量。
-        - `PREPARENACK`：表示准备否定确认消息的字符常量。
-        - `PROPOSALNACK`：表示提案否定确认消息的字符常量。
-
-`src/main/paxos/ProposerRunnable.java` 文件包含一个类：
-
-5. **`ProposerRunnable` 类**：
-    - **功能**：实现 Paxos 协议中的提议者角色，尝试发出准备请求和提案请求。
-    - **主要方法**：
-        - `run()`：线程入口点，接收消息并根据状态机处理。
-        - `receiveMessage()`：读取消息队列并处理不同类型的消息。
-        - `next(int newState)`：状态机的状态转换方法。
-        - `receivePromise(String message)`：处理承诺消息。
-        - `receivePromisenack()`：处理承诺否定确认消息。
-        - `receiveAccept(String message)`：处理接受消息。
-        - `receiveAcceptnack()`：处理提案否定确认消息。
-        - `timeout()`：处理超时事件。
-        - `setUniqueProposal()`：设置全局唯一的提案 ID。
-        - `broadCastPrepare()`：广播准备请求。
-        - `broadCastProposal()`：广播提案请求。
-
-`src/main/paxos/ResponseTime.java` 文件包含一个枚举类：
-
-6. **`ResponseTime` 枚举类**：
-    - **功能**：定义成员的不同响应时间变量。
-    - **枚举常量**：
-        - `IMMEDIATE`：立即响应。
-        - `MEDIUM`：中等响应时间。
-        - `LATE`：延迟响应。
-        - `NEVER`：不响应。
-          `src/main/paxos/Timer.java` 文件包含一个类：
-
-7. **`Timer` 类**：
-    - **功能**：在特定时间后中断线程。
-    - **主要方法**：
-        - `setTimeout(Thread interruptee, int timeout)`：在指定的超时时间后中断传入的线程。
-    - **成员变量**：
-        - `ExecutorService executor`：用于执行定时任务的单线程执行器。
+代码的主要流程如下：
+1. 创建9个成员，每个成员有不同的响应时间。
+2. 创建一个`PaxosServer`实例来管理投票。
+3. 创建一个`PaxosProtocol`实例来管理选举过程。
+4. 启动三个选举线程，模拟并发选举：
+   - M1和M2同时启动选举。
+   - M3在500毫秒后启动选举。
+5. 等待所有选举线程完成后，宣布最终的选举结果。
